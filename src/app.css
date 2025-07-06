@@ -1,0 +1,40 @@
+/* src/app.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.card {
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.location-tag {
+  background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+}
+
+.view-btn {
+  transition: all 0.3s ease;
+}
+
+.view-btn:hover {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  transform: scale(1.05);
+}
+
+.header-bg {
+  background: linear-gradient(135deg, #1e3a8a, #3730a3);
+}

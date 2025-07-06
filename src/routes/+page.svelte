@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { onMount, onDestroy } from 'svelte';
   // Images and icons
-  import heroImg from '../assets/children.jpg';
+  import heroImg1 from '../assets/children1.jpg';
+  import heroImg2 from '../assets/children 2.jpg';
   import logo from '../assets/logo.svg';
   import event1 from '../assets/event1.jpg';
   import event2 from '../assets/event2.jpg';
@@ -8,6 +10,12 @@
   import wheelchair from '../assets/wheelchair.png';
   import signLanguage from '../assets/sign language.png';
   import calender from '../assets/calender.png';
+  import uniteLogo from '../assets/logo.svg';
+  import oppamLogo from '../assets/oppam.png';
+  import colourblindlyLogo from '../assets/colourblindly.png';
+  import oppamIcon from '../assets/sign language.png';
+  import eyeIcon from '../assets/wheelchair.png'; // fallback
+  import searchIcon from '../assets/search.png';
 
   // Hero content
   const hero = {
@@ -17,6 +25,10 @@
     explore: '#',
     signup: '/signup',
   };
+
+  const heroImages = [heroImg1, heroImg2];
+  let currentHero = 0;
+  let intervalId: any;
 
   // Organisations data (with links)
   const organisations = [
@@ -77,6 +89,69 @@
     { label: 'General Support Mentally', number: '10123' },
     { label: 'General Support', number: '1098222' },
   ];
+
+  // Space projects/tools data
+  let spaceSearch = '';
+  const spaceProjects = [
+    {
+      title: 'LexiLoop: Tackle Dyslexia',
+      desc: 'Do you have Dyslexia? Improve writing with this tool :)',
+      icon: uniteLogo,
+      link: '#',
+    },
+    {
+      title: 'Oppam: Share your worries',
+      desc: 'Share your worries with Mind Empowered, with their digital diary where you can access both anonymously and other.',
+      icon: oppamLogo,
+      link: '#',
+    },
+    {
+      title: 'Colorblindly: Brower Extension',
+      desc: 'Download the browser extension to help people with color blindness experience a website better',
+      icon: colourblindlyLogo,
+      link: '#',
+    },
+  ];
+
+  let isOrg = false;
+  let showPrompt = false;
+
+  function speakPrompt() {
+    const promptText = "Press F if you need read aloud. Else press X.";
+    const utterance = new window.SpeechSynthesisUtterance(promptText);
+    window.speechSynthesis.speak(utterance);
+  }
+
+  onMount(() => {
+    console.log('userType in localStorage:', localStorage.getItem('userType'));
+    isOrg = localStorage.getItem('userType') === 'organization';
+    const userType = localStorage.getItem('userType');
+    if (!userType) {
+      showPrompt = true;
+      // Speak the prompt as soon as it appears
+      speakPrompt();
+      const handleKey = (e: KeyboardEvent) => {
+        if (showPrompt) {
+          if (e.key.toLowerCase() === 'f') {
+            showPrompt = false;
+            window.removeEventListener('keydown', handleKey);
+            // Optionally, you can start reading the whole page here
+          } else if (e.key.toLowerCase() === 'x') {
+            showPrompt = false;
+            window.removeEventListener('keydown', handleKey);
+          }
+        }
+      };
+      window.addEventListener('keydown', handleKey);
+    }
+    intervalId = setInterval(() => {
+      currentHero = (currentHero + 1) % heroImages.length;
+    }, 4000); // 4 seconds
+  });
+
+  onDestroy(() => {
+    clearInterval(intervalId);
+  });
 </script>
 
 <style>
@@ -135,35 +210,43 @@
   position: relative;
   width: 100vw;
   max-width: 100vw;
-  height: 350px;
+  height: 750px;
   overflow: hidden;
 }
 .hero-img {
   width: 100vw;
-  height: 350px;
-  object-fit: cover;
+  height: 750px;
+  object-fit:cover;
   display: block;
 }
 .hero-text-overlay {
   position: absolute;
-  left: 0; right: 0; top: 0; bottom: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 2rem 2.5rem;
   color: #fff;
   text-shadow: 0 2px 8px rgba(0,0,0,0.5);
   z-index: 2;
   pointer-events: none;
+  box-sizing: border-box;
 }
 .hero-title {
   font-size: 2.5rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
+  color: #fff;
+  text-align: left;
 }
 .hero-subtitle {
   font-size: 1.2rem;
   margin-bottom: 0;
+  color: #fff;
+  text-align: left;
 }
 .hero-content-below {
   width: 100vw;
@@ -365,25 +448,125 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
 }
 .space-title {
   font-size: 2rem;
   font-weight: 700;
   color: #222;
   margin-bottom: 0.5rem;
+  text-align: center;
 }
 .space-desc {
   color: #444;
   margin-bottom: 1.5rem;
   text-align: center;
 }
-.space-box {
+.space-search-bar-wrapper {
   width: 100%;
-  min-height: 120px;
+  display: flex;
+  justify-content: flex-start;
+}
+.space-search-bar {
+  width: 320px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.2rem;
+  position: relative;
+  justify-content: flex-start;
+  margin-left: 0;
+}
+.space-search-icon {
+  position: absolute;
+  left: 14px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+.space-search-icon img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.7;
+}
+.space-search-input {
+  width: 100%;
+  padding: 0.7rem 1.2rem 0.7rem 2.3rem;
+  border-radius: 2rem;
+  border: 1.5px solid #bdbdbd;
+  font-size: 1rem;
   background: #f7f7f7;
+  outline: none;
+  transition: border 0.2s;
+}
+.space-search-input:focus {
+  border: 1.5px solid #4caf50;
+}
+.space-cards {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-bottom: 2.5rem;
+}
+.space-card {
+  background: #fafafa;
   border: 2px solid #bdbdbd;
   border-radius: 16px;
-  margin-bottom: 1rem;
+  padding: 1.2rem 1.2rem 1.2rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s, border 0.2s;
+}
+.space-card:hover {
+  border: 2px solid #4caf50;
+  box-shadow: 0 4px 16px rgba(76,175,80,0.08);
+}
+.space-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.space-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0.2rem;
+}
+.space-card-desc {
+  font-size: 1rem;
+  color: #444;
+}
+.space-card-icon {
+  width: 40px;
+  height: 40px;
+  margin-left: 1.2rem;
+  flex-shrink: 0;
+}
+.space-contribute-btn {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.2rem;
+  padding: 0.7rem 1.5rem;
+  border-radius: 2rem;
+  border: 1.5px solid #222;
+  background: #fff;
+  color: #222;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.space-contribute-btn:hover {
+  background: #4caf50;
+  color: #fff;
+  border: 1.5px solid #4caf50;
 }
 
 .support-section {
@@ -468,6 +651,23 @@
     font-size: 0.95rem;
   }
 }
+@media (max-width: 700px) {
+  .space-section {
+    max-width: 98vw;
+    padding: 1rem 0.2rem 1rem 0.2rem;
+  }
+}
+.read-aloud-prompt {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+  background: #222;
+  color: #fff;
+  font-size: 1.2rem;
+  padding: 1.2rem 0;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
 </style>
 
 <div class="page-container">
@@ -486,7 +686,7 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-img-container">
-      <img class="hero-img" src={heroImg} alt="Inclusive classroom" />
+      <img class="hero-img" src={heroImages[currentHero]} alt="Inclusive classroom" />
       <div class="hero-text-overlay">
         <div class="hero-title">{hero.title}</div>
         <div class="hero-subtitle">{hero.subtitle}</div>
@@ -548,8 +748,34 @@
   <!-- Space Section -->
   <section class="space-section">
     <div class="space-title">SPACE</div>
-    <div class="space-desc">Here are the space where everyone can contribute their accessibility tools such that everyone – worldwide can access it in an unified platform. Unite has many space contributions as well.</div>
-    <div class="space-box"></div>
+    <div class="space-desc">Here is the space where everyone can contribute their accessibility tools such that everyone - worldwide can access it in an unified platform. Unite has many space continuations as well.</div>
+    <div class="space-search-bar-wrapper">
+      <div class="space-search-bar">
+        <span class="space-search-icon">
+          <img src={searchIcon} alt="search" />
+        </span>
+        <input
+          class="space-search-input"
+          type="text"
+          placeholder="Search your need"
+          bind:value={spaceSearch}
+        />
+      </div>
+    </div>
+    <div class="space-cards">
+      {#each spaceProjects.filter(p => p.title.toLowerCase().includes(spaceSearch.toLowerCase()) || p.desc.toLowerCase().includes(spaceSearch.toLowerCase())) as project}
+        <div class="space-card">
+          <div class="space-card-content">
+            <div class="space-card-title">{project.title}</div>
+            <div class="space-card-desc">{project.desc}</div>
+          </div>
+          <img class="space-card-icon" src={project.icon} alt="icon" />
+        </div>
+      {/each}
+    </div>
+    {#if isOrg}
+      <button class="space-contribute-btn">Contribute Projects <span style="font-size:1.3rem;">+</span></button>
+    {/if}
   </section>
 
   <!-- Support Section -->
@@ -570,4 +796,10 @@
     <div class="footer-logo"><img src={logo} alt="Logo" style="height: 28px;" /> Unite</div>
     <div>Made with Svelte</div>
   </footer>
+
+  {#if showPrompt}
+    <div class="read-aloud-prompt">
+      Press <b>F</b> if you need read aloud. Else press <b>X</b>
+    </div>
+  {/if}
 </div>

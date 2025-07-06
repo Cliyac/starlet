@@ -3,6 +3,7 @@
   import { signInWithEmailAndPassword } from 'firebase/auth';
   import { onMount } from 'svelte';
   import logo from '../../assets/logo.svg';
+  import { goto } from '$app/navigation';
 
   let userType: 'organization' | 'school' = 'organization';
   let email = '';
@@ -16,6 +17,7 @@
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       success = `Logged in as ${userType}`;
+      goto('/');
     } catch (e: any) {
       error = e.message;
     }
@@ -53,6 +55,26 @@
   color: #222;
   margin-bottom: 1.5rem;
   text-align: center;
+}
+.toggle-group {
+  display: flex;
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+.toggle-btn {
+  padding: 0.5rem 1.2rem;
+  border-radius: 2rem;
+  border: 1.5px solid #4caf50;
+  background: #fff;
+  color: #4caf50;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s, color 0.2s;
+}
+.toggle-btn.selected, .toggle-btn:active {
+  background: #4caf50;
+  color: #fff;
 }
 .input-group {
   width: 100%;
@@ -110,6 +132,10 @@
   <form class="login-card" on:submit|preventDefault={login} autocomplete="off">
     <div class="logo"><img src={logo} alt="Unite Logo" /></div>
     <div class="login-title">Sign in to Unite</div>
+    <div class="toggle-group">
+      <button type="button" class="toggle-btn {userType === 'organization' ? 'selected' : ''}" on:click={() => userType = 'organization'}>Organization</button>
+      <button type="button" class="toggle-btn {userType === 'school' ? 'selected' : ''}" on:click={() => userType = 'school'}>School</button>
+    </div>
     <div class="input-group">
       <label class="input-label" for="email">Email</label>
       <input class="input-field" id="email" type="email" bind:value={email} placeholder="Enter your email" required />
